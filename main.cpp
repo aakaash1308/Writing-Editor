@@ -1,50 +1,44 @@
-#include <ncurses.h>
-#include <cctype>
-#include <string.h>
-#include <iostream>
-#include <fstream>
+#include "keypad.h"
 
 using namespace std;
 
-string allOfIt = "";
-
-void print(int current)
-{
-	printw("%c",current);
-	allOfIt += current;
-}
-
-void backspace()
-{
-	clear();
-	allOfIt = allOfIt.substr(0, allOfIt.length()-1);
-
-	for(int i = 0; i < allOfIt.length(); i++)
-		printw("%c", allOfIt[i]);
-}
-
+//
+// Used to get every key and call appropriate function
+//
 int useKey(int current)
 {
-	int option;
+	int x,y;
+ 	getyx(stdscr, y, x);
 
-	if (current == 8 || current == 127) // delete or backspace
-		option = 2;
-	else if (current == 27) // escape
-		option = 3;
-	else
-		option = 1;
-
-	switch (option)
+	switch (current)
 	{
-		case 1 : print(current); return 0;
-		case 2 : backspace(); return 0;
-		case 3 : return 1;
+		// For delete and backspace
+		case 8 : backspace(current, y, x); return 0;
+		case 127 : backspace(current, y, x); return 0;
+
+		// For escape exit
+		case 27 : return 1;
+
+		// For enter key
+		case 10: enter(current, y, x); return 0;
+
+		// For arrow key manupilation
+		case KEY_LEFT: left(y, x); return 0;
+		case KEY_UP: up(y, x); return 0;
+		case KEY_RIGHT: right(y, x); return 0;
+		case KEY_DOWN: down(y, x); return 0;
+
+		// For any other print
+		default : print(current, y, x); return 0; 
 	}
 	return 0;
 
 
 }
 
+//
+// The function called through main when it all begins
+//
 void start()
 {
 	int current = 0, exit = 0;
@@ -56,11 +50,21 @@ void start()
 	}
  	
 }
+
+//
+//
+//
  int main()
  {
+ 	// Initializing the interface for ncurses 
  	initscr();
  	noecho();
+ 	keypad(stdscr, TRUE);
+ 
  	start();
+
+
  	endwin();
+ 	system("clear");
  	return 0;
  }
